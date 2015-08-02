@@ -1,6 +1,28 @@
 #!/usr/bin/env bash
 # USAGE: bin/compile <build-dir> <cache-dir> <env-dir>
 
+# parse and derive params
+BUILD_DIR=$1
+CACHE_DIR=$2
+
+# config
+VERSION="1.6.1"
+S3_BUCKET="stomita-buildpack-phantomjs"
+
+# s3 packages
+FILE_NAME="buildpack-phantomjs-${VERSION}.tar.gz"
+BUILDPACK_PHANTOMJS_PACKAGE="http://${S3_BUCKET}.s3.amazonaws.com/${FILE_NAME}"
+
+mkdir -p $CACHE_DIR
+if ! [ -e $CACHE_DIR/$FILE_NAME ]; then
+  echo "-----> Fetching PhantomJS buildpack binaries"
+  curl -L $BUILDPACK_PHANTOMJS_PACKAGE -s -o $CACHE_DIR/$FILE_NAME
+fi
+
+echo "-----> Extracting PhantomJS binaries" 
+mkdir -p $BUILD_DIR/vendor/phantomjs
+tar zxf $CACHE_DIR/$FILE_NAME -C $BUILD_DIR/vendor/phantomjs
+
 bp_dir=$(cd $(dirname $0); cd ..; pwd)
 
 # Load some convenience functions like status(), echo(), and indent()
